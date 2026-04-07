@@ -1,6 +1,9 @@
-export type SelectMode = "path" | "url" | "prefix";
-
 export type OutputFormat = "text" | "json";
+
+export interface HarHeader {
+  name: string;
+  value: string;
+}
 
 export interface CliResult {
   stdout: string;
@@ -10,8 +13,8 @@ export interface CliResult {
 
 export interface ScanOptions {
   files: string[];
-  where: string;
-  select: SelectMode;
+  filter: string;
+  select: string;
   prefixDepth: number;
   format: OutputFormat;
   dedupe: boolean;
@@ -22,7 +25,15 @@ export interface NormalizedEntry {
   method: string;
   url: string;
   path: string;
+  pathWithQuery: string;
   httpStatus: number;
+  statusText?: string;
   mimeType?: string;
   body: unknown;
+  requestHttpVersion?: string;
+  responseHttpVersion?: string;
+  requestHeaders: HarHeader[];
+  responseHeaders: HarHeader[];
+  requestBodyText?: string;
+  responseBodyText?: string;
 }

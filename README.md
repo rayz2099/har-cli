@@ -6,7 +6,8 @@
 
 - Scan one or more HAR files exported from Chrome DevTools
 - Filter entries with an expression such as `body.status == 1 and http.status == 403`
-- Output normalized request targets as `path`, `url`, or `prefix`
+- Render matched entries as raw HTTP request/response text by default
+- Project selected fields such as `path`, `http.status`, or `response.headers`
 - Deduplicate output by default
 - Generate Fish shell completion
 - Build and install with `just`
@@ -47,28 +48,34 @@ Default filter:
 http.status == 403 or body.status == 1
 ```
 
-Custom filter:
+Short filter form:
 
 ```bash
-har-cli sample.har --where 'body.status == 1 and http.status == 403'
+har-cli sample.har -f 'body.status == 1 and http.status == 403'
 ```
 
-Output full URL:
+Keep only path:
 
 ```bash
-har-cli sample.har --select url
+har-cli sample.har -f 'body.status == 1 and http.status == 403' -s path
+```
+
+Keep selected fields:
+
+```bash
+har-cli sample.har -s path,http.status
 ```
 
 Output prefix aggregation:
 
 ```bash
-har-cli sample.har --select prefix --prefix-depth 2
+har-cli sample.har -s prefix -p 2
 ```
 
 Structured JSON output:
 
 ```bash
-har-cli sample.har --format json
+har-cli sample.har -o json -s path,http.status
 ```
 
 ## Expression Context

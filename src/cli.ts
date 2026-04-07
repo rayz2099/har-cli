@@ -3,9 +3,9 @@ import { evaluateWhere } from "./core/expression";
 import { formatEntries } from "./core/formatter";
 import { readHarEntries } from "./core/har";
 import { renderHelp } from "./core/help";
-import type { CliResult, OutputFormat, ScanOptions, SelectMode } from "./core/types";
+import type { CliResult, OutputFormat, ScanOptions } from "./core/types";
 
-const DEFAULT_WHERE = "http.status == 403 or body.status == 1";
+const DEFAULT_FILTER = "http.status == 403 or body.status == 1";
 
 /**
  * 执行 CLI 主逻辑，测试和真实命令入口都复用该函数。
@@ -26,8 +26,8 @@ export async function executeCli(argv: string[]): Promise<CliResult> {
       return ok(`${renderFishCompletion()}\n`);
     }
 
-    const entries = await readHarEntries(parsed.options.files, parsed.options.prefixDepth);
-    const matched = entries.filter((entry) => evaluateWhere(parsed.options.where, {
+    const entries = await readHarEntries(parsed.options.files);
+    const matched = entries.filter((entry) => evaluateWhere(parsed.options.filter, {
       body: entry.body,
       http: {
         method: entry.method,
@@ -76,8 +76,8 @@ function parseArgs(argv: string[]): { kind: "help" } | { kind: "completions"; sh
 
   const options: ScanOptions = {
     files: [],
-    where: DEFAULT_WHERE,
-    select: "path",
+    filter: DEFAULT_FILTER,
+    select: "http",
     prefixDepth: 2,
     format: "text",
     dedupe: true,
@@ -92,16 +92,20 @@ function parseArgs(argv: string[]): { kind: "help" } | { kind: "completions"; sh
     }
 
     switch (current) {
-      case "--where":
-        options.where = requireValue(argv, ++index, current);
+      case "--filter":
+      case "-f":
+        options.filter = requireValue(argv, ++index, current);
         break;
       case "--select":
-        options.select = parseSelectMode(requireValue(argv, ++index, current));
+      case "-s":
+        options.select = requireValue(argv, ++index, current);
         break;
       case "--prefix-depth":
+      case "-p":
         options.prefixDepth = parsePositiveInteger(requireValue(argv, ++index, current), current);
         break;
       case "--format":
+      case "-o":
         options.format = parseOutputFormat(requireValue(argv, ++index, current));
         break;
       case "--no-dedupe":
@@ -121,18 +125,10 @@ function parseArgs(argv: string[]): { kind: "help" } | { kind: "completions"; sh
 
 function requireValue(argv: string[], index: number, option: string): string {
   const value = argv[index];
-  if (!value || value.startsWith("-")) {
+  if (value === undefined || (value.startsWith("-") && value !== "")) {
     throw new Error(`Missing value for ${option}`);
   }
   return value;
-}
-
-function parseSelectMode(value: string): SelectMode {
-  if (value === "path" || value === "url" || value === "prefix") {
-    return value;
-  }
-
-  throw new Error(`Unsupported select mode: ${value}`);
 }
 
 function parseOutputFormat(value: string): OutputFormat {
