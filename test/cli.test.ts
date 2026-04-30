@@ -46,6 +46,49 @@ describe("executeCli", () => {
     expect(result.stdout).toBe("/api/user/info\n/api/order/create\n/api/admin/report\n");
   });
 
+  test("未指定 -f 时不应隐式过滤请求", async () => {
+    const runtimeDir = mkdtempSync(resolve(process.cwd(), "dist", "no-filter-"));
+    const harPath = resolve(runtimeDir, "only-ok.har");
+    writeFileSync(harPath, JSON.stringify({
+      log: {
+        version: "1.2",
+        creator: {
+          name: "test",
+          version: "1.0",
+        },
+        entries: [
+          {
+            request: {
+              method: "GET",
+              url: "https://example.com/api/health",
+              httpVersion: "HTTP/1.1",
+              headers: [],
+            },
+            response: {
+              status: 200,
+              statusText: "OK",
+              httpVersion: "HTTP/1.1",
+              headers: [],
+              content: {
+                mimeType: "application/json",
+                text: "{\"status\":0}",
+              },
+            },
+          },
+        ],
+      },
+    }));
+
+    const result = await executeCli([
+      harPath,
+      "-s",
+      "path",
+    ]);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toBe("/api/health\n");
+  });
+
   test("prefix 输出多条结果时不插入空行", async () => {
     const result = await executeCli([
       fixturePath,

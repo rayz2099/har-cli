@@ -42,12 +42,6 @@ just install
 har-cli sample.har
 ```
 
-默认过滤条件：
-
-```text
-http.status == 403 or body.status == 1
-```
-
 自定义过滤条件：
 
 ```bash

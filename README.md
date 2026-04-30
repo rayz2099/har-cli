@@ -42,12 +42,6 @@ This installs:
 har-cli sample.har
 ```
 
-Default filter:
-
-```text
-http.status == 403 or body.status == 1
-```
-
 Short filter form:
 
 ```bash

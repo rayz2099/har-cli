@@ -9,7 +9,7 @@ export function renderHelp(programName = "har-cli"): string {
     `  ${programName} completions fish`,
     ``,
     `Options:`,
-    `  -f, --filter <expr>    过滤表达式，默认: http.status == 403 or body.status == 1`,
+    `  -f, --filter <expr>    过滤表达式；未指定时不过滤`,
     `  -s, --select <fields>  输出字段投影，默认 http；快捷值: http | path | url | prefix`,
     `  -p, --prefix-depth <n> prefix 模式下按前 n 段聚合，默认 2`,
     `  -o, --format <mode>    输出格式: text | json，默认 text`,

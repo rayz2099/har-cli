@@ -13,7 +13,7 @@ export interface CliResult {
 
 export interface ScanOptions {
   files: string[];
-  filter: string;
+  filter?: string;
   select: string;
   prefixDepth: number;
   format: OutputFormat;

@@ -5,8 +5,6 @@ import { readHarEntries } from "./core/har";
 import { renderHelp } from "./core/help";
 import type { CliResult, OutputFormat, ScanOptions } from "./core/types";
 
-const DEFAULT_FILTER = "http.status == 403 or body.status == 1";
-
 /**
  * 执行 CLI 主逻辑，测试和真实命令入口都复用该函数。
  */
@@ -27,7 +25,8 @@ export async function executeCli(argv: string[]): Promise<CliResult> {
     }
 
     const entries = await readHarEntries(parsed.options.files);
-    const matched = entries.filter((entry) => evaluateWhere(parsed.options.filter, {
+    // 未指定 -f 时保留完整 HAR 结果，避免字段投影场景被权限白名单经验条件隐式裁剪。
+    const matched = parsed.options.filter === undefined ? entries : entries.filter((entry) => evaluateWhere(parsed.options.filter ?? "", {
       body: entry.body,
       http: {
         method: entry.method,
@@ -76,7 +75,6 @@ function parseArgs(argv: string[]): { kind: "help" } | { kind: "completions"; sh
 
   const options: ScanOptions = {
     files: [],
-    filter: DEFAULT_FILTER,
     select: "http",
     prefixDepth: 2,
     format: "text",
